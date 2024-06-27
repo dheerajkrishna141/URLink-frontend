@@ -136,7 +136,7 @@ const Login = () => {
           <Button marginEnd={5} type="submit">
             Submit
           </Button>
-          <Link to={"/register"}>Not registered? click here</Link>
+          <Link to={"/register"}>Not registered?click here</Link>
         </HStack>
       </form>
     </>
