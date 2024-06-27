@@ -23,6 +23,7 @@ const Profile = () => {
       </Text>
 
       <Text>Nothing to do right now</Text>
+      <Text>Should do something here</Text>
     </Box>
   );
 };
