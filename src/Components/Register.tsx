@@ -16,6 +16,7 @@ import { Schema, z } from "zod";
 import userService from "../Services/userService";
 import { Link } from "react-router-dom";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { user } from "../Services/http-service_user";
 
 const schema = z
   .object({
@@ -48,12 +49,17 @@ const Register = () => {
   });
 
   const handlereg = (data: FormData) => {
+
+    const userdto: user={
+      userName: data.email,
+      firstName: data.firstname,
+      lastName: data.lastname,
+      password: data.password,
+      role: ["ROLE_USER"]
+    }
     userService
       .register({
-        username: data.email,
-        password: data.password,
-        firstname: data.firstname,
-        lastname: data.lastname,
+        data: userdto
       })
       .then((res) => {
         setError("");
@@ -62,9 +68,8 @@ const Register = () => {
       })
       .catch((err) => {
         setMessage("");
-        setError(err.response.data.message);
+        setError(err.response.data);
       });
-    console.log(data);
   };
 
   return (
@@ -84,7 +89,7 @@ const Register = () => {
       <form
         onSubmit={handleSubmit((data) => {
           handlereg(data);
-          reset();
+          //reset();
         })}
       >
         <Box marginBottom={5} marginTop={10}>

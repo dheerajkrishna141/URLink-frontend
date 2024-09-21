@@ -1,10 +1,12 @@
+import { AxiosRequestConfig } from "axios";
 import apiClient from "./api-client";
 
 export interface user{
-    username: string,
+    userName: string,
     password: string,
-    firstname: string,
-    lastname: string
+    firstName: string,
+    lastName: string,
+    role: string[]
 }
 interface fetchedUser extends user{
     id: number
@@ -33,12 +35,16 @@ class HTTPService{
         this.endpoint = endpoint;
     }
 
-    register(user: user){
-        return apiClient.post<fetchedUser>(this.endpoint+"/register", user);
+    register(config : AxiosRequestConfig){
+        return apiClient.post<fetchedUser>(this.endpoint+"/register", config.data).then((res)=> res.data);
     }
 
-    login(user: userLogin){
-        return apiClient.post<FetchResponse>(this.endpoint+"/login", user).then((res)=>res.data);
+    login(config: AxiosRequestConfig){
+        return apiClient.get<FetchResponse>(this.endpoint+"/login", config).then((res)=>res.data);
+    }
+
+    logout(){
+        return apiClient.get("/logout");
     }
 
 

@@ -43,7 +43,7 @@ const UrlTable = ({
   handleCopy,
   deleteUrl,
 }: Props) => {
-  const base = "http://localhost:8080/api/";
+  const base = "http://localhost:8080/url";
 
   return (
     <div>
@@ -74,12 +74,12 @@ const UrlTable = ({
                   <Td>
                     <ExpandableText>{dat.url}</ExpandableText>
                   </Td>
-                  <Td>{base + id + "/" + dat.alias}</Td>
+                  <Td>{base+ "/" + dat.alias}</Td>
                   <Td>
                     <ButtonGroup justifyContent={"space-between"}>
                       <Button
                         onClick={() => {
-                          handleCopy(base + id + "/" + dat.alias);
+                          handleCopy(base + "/" + dat.alias);
                         }}
                         size="sm"
                         variant="outline"

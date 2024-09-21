@@ -10,20 +10,14 @@ import {
   InputRightElement,
   Text,
 } from "@chakra-ui/react";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import userService from "../Services/userService";
-import { user, userLogin } from "../Services/http-service_user";
+import { userLogin } from "../Services/http-service_user";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import apiClient from "../Services/api-client";
-import {
-  Link,
-  Navigate,
-  useNavigate,
-  useOutletContext,
-} from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import LoginContext from "../StateManagement/LoginContext";
 import useLocalStorage from "../hooks/useLocalStorage";
 
@@ -41,41 +35,32 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
-  const { setStatus, user, id, message, setId, setMessage, status } =
-    useContext(LoginContext);
+  const { setStatus, message, status } = useContext(LoginContext);
 
   const [loginErr, setLoginErr] = useState("");
   const [pvisible, setPVisible] = useState(false);
-  const { setItem: setUserStatus, getItem: getUserStatus } =
-    useLocalStorage("userStatus");
-  const { setItem: setUser, getItem: getUser } = useLocalStorage("user");
-  const { setItem: setUserId, getItem: getUserId } = useLocalStorage("userId");
+  const { setItem: setUserStatus } = useLocalStorage("userStatus");
   const handleLogin = (data: userLogin) => {
     userService
-      .login(data)
+      .login({
+        auth: {
+          username: data.userName,
+          password: data.password,
+        },
+      })
       .then((data) => {
-        console.log(data.user);
-
+        console.log(data);
         setStatus(data.status);
         setUserStatus(data.status);
-        setUser(data.user);
-        setUserId(data.user.id);
-        setId(data.user.id);
-        setUser({
-          firstname: data.user.firstname,
-          lastname: data.user.lastname,
-          password: data.user.password,
-          username: data.user.username,
-        });
-
         setLoginErr("");
       })
       .catch((er) => {
+        console.log(er);
+
         setLoginErr(er.response.data.message);
       });
   };
@@ -99,7 +84,7 @@ const Login = () => {
       <form
         onSubmit={handleSubmit((data) => {
           handleLogin(data);
-          reset();
+          // reset();
         })}
       >
         <Box marginBottom={5}>

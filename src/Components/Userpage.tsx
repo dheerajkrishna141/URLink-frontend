@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useContext, useState } from "react";
 import AddingUrl from "./AddingUrl";
-import { Link, Navigate, Outlet, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import LoginContext from "../StateManagement/LoginContext";
 import { CiLogout } from "react-icons/ci";
 import { FaUserLarge } from "react-icons/fa6";
@@ -22,6 +22,8 @@ import useUpdateUrl from "../hooks/useUpdateUrl";
 import useDeleteUrl from "../hooks/useDeleteUrl";
 import UrlTable from "./UrlTable";
 import { user } from "../Services/http-service_user";
+import apiClient from "../Services/api-client";
+import userService from "../Services/userService";
 
 export interface User_urls {
   alias: string;
@@ -64,6 +66,8 @@ const Userpage = () => {
 
   const addUrl = (data: User_urls) => {
     mutate(data);
+    console.log("url add:");
+
     if (mutateError) setError(mutateError.response.data.message);
     else {
       //toast message goes here
@@ -75,6 +79,10 @@ const Userpage = () => {
         position: "top",
       });
     }
+  };
+
+  const handleLogout = () => {
+    userService.logout();
   };
 
   const handleCopy = (text: string) => {
@@ -147,6 +155,7 @@ const Userpage = () => {
             setStatus(false);
             setUser({} as user);
             setError("");
+            handleLogout();
           }}
         >
           Logout

@@ -1,4 +1,4 @@
 import DTOuserfunction from "./http-service_user";
 
-const userService =DTOuserfunction("/api/auth");
+const userService =DTOuserfunction("/user");
 export default userService;
