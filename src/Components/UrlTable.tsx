@@ -23,13 +23,13 @@ import React from "react";
 import UpdatingData from "./UpdatingData";
 import ExpandableText from "./ExpandableText";
 import { User_urls } from "./Userpage";
+import { CONSTANTS } from "../Constants/appConstants";
 interface Props {
   urlinfo: User_urls[] | undefined;
   update: string;
   setUpdate: (update: string) => void;
   setError: (error: string) => void;
   handleUpdate: (newUrl: string, alias: string) => void;
-  id: string | null;
   handleCopy: (text: string) => void;
   deleteUrl: (alias: string) => void;
 }
@@ -39,11 +39,10 @@ const UrlTable = ({
   setUpdate,
   setError,
   handleUpdate,
-  id,
   handleCopy,
   deleteUrl,
 }: Props) => {
-  const base = "http://localhost:8080/url";
+  const base = CONSTANTS.BASE_URL + "/url";
 
   return (
     <div>
@@ -74,7 +73,7 @@ const UrlTable = ({
                   <Td>
                     <ExpandableText>{dat.url}</ExpandableText>
                   </Td>
-                  <Td>{base+ "/" + dat.alias}</Td>
+                  <Td>{base + "/" + dat.alias}</Td>
                   <Td>
                     <ButtonGroup justifyContent={"space-between"}>
                       <Button

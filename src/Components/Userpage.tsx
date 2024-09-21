@@ -9,9 +9,9 @@ import {
   Box,
   useToast,
 } from "@chakra-ui/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AddingUrl from "./AddingUrl";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LoginContext from "../StateManagement/LoginContext";
 import { CiLogout } from "react-icons/ci";
 import { FaUserLarge } from "react-icons/fa6";
@@ -22,8 +22,8 @@ import useUpdateUrl from "../hooks/useUpdateUrl";
 import useDeleteUrl from "../hooks/useDeleteUrl";
 import UrlTable from "./UrlTable";
 import { user } from "../Services/http-service_user";
-import apiClient from "../Services/api-client";
 import userService from "../Services/userService";
+import { CONSTANTS } from "../Constants/appConstants";
 
 export interface User_urls {
   alias: string;
@@ -39,18 +39,23 @@ const Userpage = () => {
   const [error, setError] = useState("");
   const [copyStat, setCopyStat] = useState(false);
   const [copyError, setCopyError] = useState("");
-  const { status, setStatus } = useContext(LoginContext);
-  const { getItem: getUserStatus, setItem: setUserStatus } =
-    useLocalStorage("userStatus");
-  const { clear: clearUser, setItem: setUser } = useLocalStorage("user");
-  const { getItem: getUserId, setItem: setUserId } = useLocalStorage("userId");
-  setStatus(JSON.parse(getUserStatus() || "false"));
+  const { setItem: setUser } = useLocalStorage(CONSTANTS.USER_STORAGE_KEY);
+  const { setItem: setStatus, getItem: getStatus } = useLocalStorage(
+    CONSTANTS.USER_STATUS_KEY
+  );
   const navigate = useNavigate();
 
-  const id = getUserId();
+  useEffect(() => {
+    if (getStatus() == "false") {
+      console.log(getStatus());
+
+      navigate("/login", { replace: true });
+    }
+  }, [getStatus()]);
+
   const [update, setUpdate] = useState("");
 
-  const { data: urlinfo, error: FetchError, refetch } = useUrl();
+  const { data: urlinfo, error: FetchError } = useUrl();
   const { mutate, error: mutateError } = useAddUrl();
   const { mutate: mutateUpdate, error: mutateUpdateError } = useUpdateUrl();
   const { mutate: mutateDelete, error: mutateDeleteError } = useDeleteUrl();
@@ -66,7 +71,6 @@ const Userpage = () => {
 
   const addUrl = (data: User_urls) => {
     mutate(data);
-    console.log("url add:");
 
     if (mutateError) setError(mutateError.response.data.message);
     else {
@@ -83,6 +87,7 @@ const Userpage = () => {
 
   const handleLogout = () => {
     userService.logout();
+    navigate("/login", { replace: true });
   };
 
   const handleCopy = (text: string) => {
@@ -111,13 +116,13 @@ const Userpage = () => {
     }
   };
 
-  const {
-    isOpen: isVisible,
-    onClose: closeAlert,
-    onOpen,
-  } = useDisclosure({ defaultIsOpen: true });
+  const { isOpen: isVisible, onClose: closeAlert } = useDisclosure({
+    defaultIsOpen: true,
+  });
 
-  if (!status) return <Navigate to={"/login"} replace={true}></Navigate>;
+  // if (!status) return <Navigate to={"/login"} replace={true}></Navigate>;
+  console.log(getStatus());
+
   return (
     <Box marginTop={5}>
       {error && isVisible && (
@@ -151,7 +156,7 @@ const Userpage = () => {
           onClick={() => {
             //clearUser();
 
-            setUserStatus(false);
+            // setUserStatus(false);
             setStatus(false);
             setUser({} as user);
             setError("");
@@ -165,7 +170,6 @@ const Userpage = () => {
         deleteUrl={deleteUrl}
         handleCopy={handleCopy}
         handleUpdate={handleUpdate}
-        id={id}
         setError={setError}
         setUpdate={setUpdate}
         update={update}

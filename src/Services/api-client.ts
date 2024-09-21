@@ -1,8 +1,7 @@
 import axios from "axios";
+import { CONSTANTS } from "../Constants/appConstants";
 
-export default axios.create(
-    {
-        baseURL:"http://localhost:8080",
-        withCredentials: true
-    }
-)
+export default axios.create({
+  baseURL: CONSTANTS.BASE_URL,
+  withCredentials: true,
+});

@@ -9,17 +9,19 @@ import {
   InputGroup,
   InputRightElement,
   Text,
+  useToast,
 } from "@chakra-ui/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import userService from "../Services/userService";
-import { userLogin } from "../Services/http-service_user";
+import { user, userLogin } from "../Services/http-service_user";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import LoginContext from "../StateManagement/LoginContext";
 import useLocalStorage from "../hooks/useLocalStorage";
+import { CONSTANTS } from "../Constants/appConstants";
 
 const schema = z.object({
   userName: z.string().email({ message: "Enter a valid Email" }),
@@ -39,11 +41,32 @@ const Login = () => {
     resolver: zodResolver(schema),
   });
 
-  const { setStatus, message, status } = useContext(LoginContext);
-
+  const { message } = useContext(LoginContext);
+  const navigate = useNavigate();
   const [loginErr, setLoginErr] = useState("");
   const [pvisible, setPVisible] = useState(false);
-  const { setItem: setUserStatus } = useLocalStorage("userStatus");
+  const { setItem: setUser } = useLocalStorage(CONSTANTS.USER_STORAGE_KEY);
+  const { setItem: setStatus, getItem: getStatus } = useLocalStorage(
+    CONSTANTS.USER_STATUS_KEY
+  );
+  const toast = useToast();
+
+  useEffect(() => {
+    if (getStatus() === "true") {
+      userService.logout().then((res) => {
+        toast({
+          title: "Last session invalidated!",
+          status: "info",
+          duration: 5000, // 5 seconds
+          isClosable: true,
+          position: "top",
+        });
+      });
+      setStatus(false);
+      setUser({} as user);
+    }
+  }, [getStatus()]);
+
   const handleLogin = (data: userLogin) => {
     userService
       .login({
@@ -55,25 +78,24 @@ const Login = () => {
       .then((data) => {
         console.log(data);
         setStatus(data.status);
-        setUserStatus(data.status);
+        setUser(data.user);
         setLoginErr("");
+        navigate("/userpage", { replace: true });
       })
       .catch((er) => {
         console.log(er);
-
         setLoginErr(er.response.data.message);
       });
   };
-  if (status) return <Navigate to={"/userpage"} replace={true}></Navigate>;
 
   return (
     <>
-      {status === false && message && (
+      {/* {getStatus() === "false" && message && (
         <Alert status="error" variant={"left-accent"} color={"orangered"}>
           <AlertIcon />
           {message}
         </Alert>
-      )}
+      )} */}
       {loginErr && (
         <Alert status="error" variant={"left-accent"} color={"orangered"}>
           <AlertIcon />
