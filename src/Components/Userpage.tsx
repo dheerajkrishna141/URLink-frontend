@@ -103,6 +103,7 @@ const Userpage = () => {
   };
   const handleUpdate = (newUrl: string, alias: string) => {
     mutateUpdate({ newUrl: newUrl, alias: alias });
+
     if (mutateUpdateError) setError(mutateUpdateError.response.data.message);
     else {
       toast({
@@ -119,9 +120,6 @@ const Userpage = () => {
   const { isOpen: isVisible, onClose: closeAlert } = useDisclosure({
     defaultIsOpen: true,
   });
-
-  // if (!status) return <Navigate to={"/login"} replace={true}></Navigate>;
-  console.log(getStatus());
 
   return (
     <Box marginTop={5}>
