@@ -2,14 +2,22 @@ import { Axios, AxiosRequestConfig } from "axios";
 import { User_urls, urlUpdate } from "../Components/Userpage";
 import apiClient from "./api-client";
 
-class HTTPService<User_urls> {
+export interface UrlFetchResponse {
+  content: User_urls[];
+  totalPages: number;
+  last: boolean;
+  first: boolean;
+}
+class HTTPService {
   endpoint: string;
   constructor(endpoint: string) {
     this.endpoint = endpoint;
   }
 
-  get() {
-    return apiClient.get<User_urls[]>(this.endpoint).then((res) => res.data);
+  get(config: AxiosRequestConfig) {
+    return apiClient
+      .get<UrlFetchResponse>(this.endpoint, config)
+      .then((res) => res.data);
   }
 
   delete(config: AxiosRequestConfig) {
@@ -29,5 +37,5 @@ class HTTPService<User_urls> {
       .then((res) => res.data);
   }
 }
-const DTOfunction = (endpoint: string) => new HTTPService<User_urls>(endpoint);
+const DTOfunction = (endpoint: string) => new HTTPService(endpoint);
 export default DTOfunction;

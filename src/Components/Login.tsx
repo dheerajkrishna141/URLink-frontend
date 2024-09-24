@@ -80,7 +80,7 @@ const Login = () => {
         setStatus(data.status);
         setUser(data.user);
         setLoginErr("");
-        navigate("/userpage", { replace: true });
+        navigate("/userpage?pageNo=0", { replace: true });
       })
       .catch((er) => {
         console.log(er);

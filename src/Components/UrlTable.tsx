@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   ButtonGroup,
   Popover,
@@ -19,13 +20,16 @@ import {
   Tr,
   useDisclosure,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import UpdatingData from "./UpdatingData";
 import ExpandableText from "./ExpandableText";
 import { User_urls } from "./Userpage";
 import { CONSTANTS } from "../Constants/appConstants";
+import CustomMessage from "./CustomMessage";
+import { UrlFetchResponse } from "../Services/http-service";
+import { useSearchParams } from "react-router-dom";
 interface Props {
-  urlinfo: User_urls[] | undefined;
+  urlinfo: UrlFetchResponse | undefined;
   update: string;
   setUpdate: (update: string) => void;
   setError: (error: string) => void;
@@ -33,6 +37,7 @@ interface Props {
   handleCopy: (text: string) => void;
   deleteUrl: (alias: string) => void;
 }
+
 const UrlTable = ({
   urlinfo,
   update,
@@ -44,8 +49,11 @@ const UrlTable = ({
 }: Props) => {
   const base = CONSTANTS.BASE_URL + "/url";
 
+  if (urlinfo?.content?.length == 0 && urlinfo.first) {
+    return <CustomMessage></CustomMessage>;
+  }
   return (
-    <div>
+    <Box>
       <TableContainer marginBottom={4} marginLeft={10}>
         <Table colorScheme="gray" variant={"simple"}>
           <TableCaption>URL'S</TableCaption>
@@ -57,9 +65,10 @@ const UrlTable = ({
             </Tr>
           </Thead>
           <Tbody>
-            {urlinfo?.map((dat, index) =>
+            {urlinfo?.content?.map((dat, index) =>
               update === dat.alias ? (
                 <UpdatingData
+                  key={index}
                   handleCancel={() => {
                     setUpdate("");
                     setError("");
@@ -114,7 +123,7 @@ const UrlTable = ({
           </Tbody>
         </Table>
       </TableContainer>
-    </div>
+    </Box>
   );
 };
 

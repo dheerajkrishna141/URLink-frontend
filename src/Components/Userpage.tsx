@@ -11,8 +11,14 @@ import {
 } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import AddingUrl from "./AddingUrl";
-import { useNavigate } from "react-router-dom";
+import {
+  Navigate,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import LoginContext from "../StateManagement/LoginContext";
+
 import { CiLogout } from "react-icons/ci";
 import { FaUserLarge } from "react-icons/fa6";
 import useUrl from "../hooks/useUrl";
@@ -24,10 +30,14 @@ import UrlTable from "./UrlTable";
 import { user } from "../Services/http-service_user";
 import userService from "../Services/userService";
 import { CONSTANTS } from "../Constants/appConstants";
+import CustomMessage from "./CustomMessage";
+import { Pagination } from "@mui/material";
+import NotFound from "./NotFound";
 
 export interface User_urls {
   alias: string;
   url: string;
+  last?: boolean | null;
 }
 
 export interface urlUpdate {
@@ -45,28 +55,42 @@ const Userpage = () => {
   );
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (getStatus() == "false") {
-      console.log(getStatus());
-
-      navigate("/login", { replace: true });
-    }
-  }, [getStatus()]);
-
   const [update, setUpdate] = useState("");
 
   const { data: urlinfo, error: FetchError } = useUrl();
   const { mutate, error: mutateError } = useAddUrl();
   const { mutate: mutateUpdate, error: mutateUpdateError } = useUpdateUrl();
   const { mutate: mutateDelete, error: mutateDeleteError } = useDeleteUrl();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pageNo = parseInt(searchParams.get("pageNo") || "1");
 
   const toast = useToast();
+  useEffect(() => {
+    if (getStatus() == "false") {
+      navigate("/login", { replace: true });
+    }
+
+    if (pageNo < 0 || pageNo > (urlinfo?.totalPages || Number.MAX_VALUE)) {
+      console.log(pageNo);
+
+      setSearchParams({ pageNo: String(0) });
+    }
+  }, [getStatus, searchParams]);
 
   if (FetchError) setError(FetchError.message);
 
   const deleteUrl = (alias: string) => {
     mutateDelete(alias);
     if (mutateDeleteError) setError(mutateDeleteError.response.data.message);
+    else {
+      toast({
+        title: "Url Deleted",
+        status: "info",
+        duration: 3000, // 3 seconds
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const addUrl = (data: User_urls) => {
@@ -78,7 +102,7 @@ const Userpage = () => {
       toast({
         title: "Url Added",
         status: "success",
-        duration: 5000, // 5 seconds
+        duration: 3000, // 3 seconds
         isClosable: true,
         position: "top",
       });
@@ -95,6 +119,13 @@ const Userpage = () => {
       .writeText(text)
       .then(() => {
         setCopyStat(true);
+        toast({
+          title: "Url Copied",
+          status: "info",
+          duration: 2000, // 2 seconds
+          isClosable: true,
+          position: "bottom",
+        });
       })
       .catch((err) => {
         setCopyError(err.message);
@@ -109,7 +140,7 @@ const Userpage = () => {
       toast({
         title: "Url updated",
         status: "success",
-        duration: 5000, //5 seconds
+        duration: 3000, //3 seconds
         isClosable: true,
         position: "top",
       });
@@ -121,8 +152,12 @@ const Userpage = () => {
     defaultIsOpen: true,
   });
 
+  if (getStatus() == "false") {
+    return <Navigate to={"/login"} replace={true}></Navigate>;
+  }
+
   return (
-    <Box marginTop={5}>
+    <Box marginTop={5} p={5}>
       {error && isVisible && (
         <Alert status="error" marginBottom={5} color="red">
           <AlertIcon />
@@ -144,7 +179,9 @@ const Userpage = () => {
               navigate("/userpage/profile");
             }}
             size={"sm"}
-          ></Button>
+          >
+            Profile
+          </Button>
         </Text>
 
         <Button
@@ -173,7 +210,26 @@ const Userpage = () => {
         update={update}
         urlinfo={urlinfo}
       ></UrlTable>
-
+      <Button
+        hidden={urlinfo?.first}
+        onClick={() => {
+          setSearchParams({
+            pageNo: String(pageNo - 1),
+          });
+        }}
+      >
+        Previous
+      </Button>
+      <Button
+        hidden={urlinfo?.last}
+        onClick={() => {
+          setSearchParams({
+            pageNo: String(pageNo + 1),
+          });
+        }}
+      >
+        Next
+      </Button>
       <AddingUrl handleAdd={(data) => addUrl(data)}></AddingUrl>
     </Box>
   );
