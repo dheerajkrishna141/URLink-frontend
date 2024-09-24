@@ -1,23 +1,7 @@
-import {
-  Button,
-  HStack,
-  Text,
-  useDisclosure,
-  Alert,
-  AlertIcon,
-  CloseButton,
-  Box,
-  useToast,
-} from "@chakra-ui/react";
-import { useContext, useEffect, useState } from "react";
+import { Button, HStack, Text, Box, useToast } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import AddingUrl from "./AddingUrl";
-import {
-  Navigate,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
-import LoginContext from "../StateManagement/LoginContext";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
 import { CiLogout } from "react-icons/ci";
 import { FaUserLarge } from "react-icons/fa6";
@@ -30,9 +14,7 @@ import UrlTable from "./UrlTable";
 import { user } from "../Services/http-service_user";
 import userService from "../Services/userService";
 import { CONSTANTS } from "../Constants/appConstants";
-import CustomMessage from "./CustomMessage";
-import { Pagination } from "@mui/material";
-import NotFound from "./NotFound";
+import Pagination from "./Pagination";
 
 export interface User_urls {
   alias: string;
@@ -46,9 +28,6 @@ export interface urlUpdate {
 }
 
 const Userpage = () => {
-  const [error, setError] = useState("");
-  const [copyStat, setCopyStat] = useState(false);
-  const [copyError, setCopyError] = useState("");
   const { setItem: setUser } = useLocalStorage(CONSTANTS.USER_STORAGE_KEY);
   const { setItem: setStatus, getItem: getStatus } = useLocalStorage(
     CONSTANTS.USER_STATUS_KEY
@@ -57,10 +36,10 @@ const Userpage = () => {
 
   const [update, setUpdate] = useState("");
 
-  const { data: urlinfo, error: FetchError } = useUrl();
-  const { mutate, error: mutateError } = useAddUrl();
-  const { mutate: mutateUpdate, error: mutateUpdateError } = useUpdateUrl();
-  const { mutate: mutateDelete, error: mutateDeleteError } = useDeleteUrl();
+  const { data: urlinfo } = useUrl();
+  const { mutate } = useAddUrl();
+  const { mutate: mutateUpdate } = useUpdateUrl();
+  const { mutate: mutateDelete } = useDeleteUrl();
   const [searchParams, setSearchParams] = useSearchParams();
   const pageNo = parseInt(searchParams.get("pageNo") || "1");
 
@@ -70,43 +49,17 @@ const Userpage = () => {
       navigate("/login", { replace: true });
     }
 
-    if (pageNo < 0 || pageNo > (urlinfo?.totalPages || Number.MAX_VALUE)) {
-      console.log(pageNo);
-
-      setSearchParams({ pageNo: String(0) });
+    if (pageNo > (urlinfo?.totalPages || Number.MAX_VALUE)) {
+      setSearchParams({ pageNo: String((urlinfo?.totalPages || 1) - 1) });
     }
   }, [getStatus, searchParams]);
 
-  if (FetchError) setError(FetchError.message);
-
   const deleteUrl = (alias: string) => {
     mutateDelete(alias);
-    if (mutateDeleteError) setError(mutateDeleteError.response.data.message);
-    else {
-      toast({
-        title: "Url Deleted",
-        status: "info",
-        duration: 3000, // 3 seconds
-        isClosable: true,
-        position: "top",
-      });
-    }
   };
 
   const addUrl = (data: User_urls) => {
     mutate(data);
-
-    if (mutateError) setError(mutateError.response.data.message);
-    else {
-      //toast message goes here
-      toast({
-        title: "Url Added",
-        status: "success",
-        duration: 3000, // 3 seconds
-        isClosable: true,
-        position: "top",
-      });
-    }
   };
 
   const handleLogout = () => {
@@ -115,42 +68,35 @@ const Userpage = () => {
   };
 
   const handleCopy = (text: string) => {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        setCopyStat(true);
-        toast({
-          title: "Url Copied",
-          status: "info",
-          duration: 2000, // 2 seconds
-          isClosable: true,
-          position: "bottom",
-        });
-      })
-      .catch((err) => {
-        setCopyError(err.message);
-        setCopyStat(false);
-      });
+    toast.promise(navigator.clipboard.writeText(text), {
+      success: {
+        title: "Url Copied",
+        colorScheme: "teal",
+        variant: "subtle",
+        duration: 2000, // 2 seconds
+        isClosable: true,
+        position: "bottom",
+      },
+      error: {
+        title: "Error copying",
+        variant: "subtle",
+        duration: 2000, // 2 seconds
+        isClosable: true,
+        position: "bottom",
+      },
+      loading: {},
+    });
   };
   const handleUpdate = (newUrl: string, alias: string) => {
     mutateUpdate({ newUrl: newUrl, alias: alias });
-
-    if (mutateUpdateError) setError(mutateUpdateError.response.data.message);
-    else {
-      toast({
-        title: "Url updated",
-        status: "success",
-        duration: 3000, //3 seconds
-        isClosable: true,
-        position: "top",
-      });
-      setUpdate("");
-    }
+    setUpdate("");
   };
 
-  const { isOpen: isVisible, onClose: closeAlert } = useDisclosure({
-    defaultIsOpen: true,
-  });
+  const handlePageChange = (newPage: number) => {
+    setSearchParams({
+      pageNo: String(newPage - 1),
+    });
+  };
 
   if (getStatus() == "false") {
     return <Navigate to={"/login"} replace={true}></Navigate>;
@@ -158,18 +104,6 @@ const Userpage = () => {
 
   return (
     <Box marginTop={5} p={5}>
-      {error && isVisible && (
-        <Alert status="error" marginBottom={5} color="red">
-          <AlertIcon />
-          {error}
-
-          <CloseButton
-            position={"absolute"}
-            right={5}
-            onClick={closeAlert}
-          ></CloseButton>
-        </Alert>
-      )}
       <HStack justifyContent={"right"}>
         <Text>
           <Button
@@ -189,12 +123,8 @@ const Userpage = () => {
           size={"sm"}
           leftIcon={<CiLogout />}
           onClick={() => {
-            //clearUser();
-
-            // setUserStatus(false);
             setStatus(false);
             setUser({} as user);
-            setError("");
             handleLogout();
           }}
         >
@@ -205,32 +135,22 @@ const Userpage = () => {
         deleteUrl={deleteUrl}
         handleCopy={handleCopy}
         handleUpdate={handleUpdate}
-        setError={setError}
         setUpdate={setUpdate}
         update={update}
         urlinfo={urlinfo}
       ></UrlTable>
-      <Button
-        hidden={urlinfo?.first}
-        onClick={() => {
-          setSearchParams({
-            pageNo: String(pageNo - 1),
-          });
-        }}
-      >
-        Previous
-      </Button>
-      <Button
-        hidden={urlinfo?.last}
-        onClick={() => {
-          setSearchParams({
-            pageNo: String(pageNo + 1),
-          });
-        }}
-      >
-        Next
-      </Button>
-      <AddingUrl handleAdd={(data) => addUrl(data)}></AddingUrl>
+
+      <Box hidden={urlinfo?.content.length == 0}>
+        <Pagination
+          currentPage={pageNo}
+          onPageChange={handlePageChange}
+          totalPages={urlinfo?.totalPages || 1}
+        ></Pagination>
+      </Box>
+
+      <Box marginTop={10}>
+        <AddingUrl handleAdd={(data) => addUrl(data)}></AddingUrl>
+      </Box>
     </Box>
   );
 };

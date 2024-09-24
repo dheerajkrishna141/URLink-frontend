@@ -23,7 +23,7 @@ const Profile = () => {
           position={"absolute"}
           left={10}
           onClick={() => {
-            navigate("/userpage?pageNo=0");
+            navigate("/userpage");
           }}
         >
           <IoArrowBackOutline size={40} />

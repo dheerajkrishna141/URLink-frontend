@@ -32,7 +32,6 @@ interface Props {
   urlinfo: UrlFetchResponse | undefined;
   update: string;
   setUpdate: (update: string) => void;
-  setError: (error: string) => void;
   handleUpdate: (newUrl: string, alias: string) => void;
   handleCopy: (text: string) => void;
   deleteUrl: (alias: string) => void;
@@ -42,7 +41,6 @@ const UrlTable = ({
   urlinfo,
   update,
   setUpdate,
-  setError,
   handleUpdate,
   handleCopy,
   deleteUrl,
@@ -71,7 +69,6 @@ const UrlTable = ({
                   key={index}
                   handleCancel={() => {
                     setUpdate("");
-                    setError("");
                   }}
                   data={dat}
                   handleUpdate={handleUpdate}
