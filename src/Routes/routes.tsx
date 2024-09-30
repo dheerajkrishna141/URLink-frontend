@@ -6,6 +6,7 @@ import Register from "../Components/Register";
 import Userpage from "../Components/Userpage";
 import NotFound from "../Components/NotFound";
 import Profile from "../Components/Profile";
+import PasswordChange from "../Components/passwordChange";
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
       {
         path: "userpage/profile",
         element: <Profile />,
+      },
+      {
+        path: "userpage/passwordChange",
+        element: <PasswordChange />,
       },
     ],
     errorElement: <NotFound></NotFound>,

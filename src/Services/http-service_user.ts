@@ -1,4 +1,4 @@
-import { AxiosRequestConfig } from "axios";
+import { Axios, AxiosRequestConfig } from "axios";
 import apiClient from "./api-client";
 
 export interface user {
@@ -44,6 +44,12 @@ class HTTPService {
 
   logout() {
     return apiClient.get("/logout").then((res) => res.data);
+  }
+
+  updatePassword(config: AxiosRequestConfig) {
+    return apiClient
+      .post(this.endpoint + "/updatePassword", config.data)
+      .then((res) => res.data);
   }
 }
 const DTOuserfunction = (endpoint: string) => new HTTPService(endpoint);
