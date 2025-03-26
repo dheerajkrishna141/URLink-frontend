@@ -6,11 +6,13 @@ URLink (frontend) is a responsive user interface for URLink (backend), a URL sho
 ## Getting Started
 To get started with URLink, follow these steps:
 
-1. Clone this repository to your local machine
+1. Run URLink (backend), For detailed instructions on installation and setup, visit [URLink Backend](https://github.com/dheerajkrishna141/URLink-backend). This step is crucial to ensure seamless communication between the backend and frontend systems.
+
+2. Clone this repository to your local machine
 
    ```bash
    git clone https://github.com/dheerajkrishna141/URLink-frontend.git
    
-2. Run `npm install` to install the required dependencies.
-4. Then run the URLink (backend), For detailed instructions on installation and setup, visit the [URLink Backend Documentation](https://github.com/dheerajkrishna141/URLink-backend). This step is crucial to ensure seamless communication between the backend and frontend systems.
-5. Run `npm run dev` to start the web server.
+3. Run `npm install` to install the required dependencies.
+ 
+4. Run `npm run dev` to start the web server.
